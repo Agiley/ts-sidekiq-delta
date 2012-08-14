@@ -26,7 +26,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
 
     unless flag_as_deleted_ids.empty?
       # Filter out the ids that aren't present in sphinx
-      flag_as_deleted_ids = filter_flag_as_deleted_ids(flag_as_deleted_ids, index)
+      flag_as_deleted_ids = ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.filter_flag_as_deleted_ids(flag_as_deleted_ids, index)
 
       unless flag_as_deleted_ids.empty?
         # Each hash element should be of the form { id => [1] }

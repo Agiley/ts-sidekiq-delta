@@ -125,7 +125,11 @@ describe ThinkingSphinx::Deltas::SidekiqDelta do
 
     before :all do
       class RandomJob
-        @queue = 'ts_delta'
+        include Sidekiq::Worker
+        sidekiq_options unique: true, retry: true, queue: 'ts_delta'
+        
+        def perform(index)
+        end
       end
     end
 

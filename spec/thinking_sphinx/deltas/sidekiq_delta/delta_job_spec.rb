@@ -17,13 +17,13 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
 
     it "should output the delta indexing by default" do
       subject.should_receive(:puts)
-      subject.perform('foo_delta')
+      subject.perform_async('foo_delta')
     end
 
     it "should not output the delta indexing if requested" do
       ThinkingSphinx.suppress_delta_output = true
       subject.should_not_receive(:puts)
-      subject.perform('foo_delta')
+      subject.perform_async('foo_delta')
     end
 
     it "should process just the requested index" do
@@ -31,7 +31,7 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
         c.should match(/foo_delta/)
         c.should_not match(/--all/)
       end
-      subject.perform('foo_delta')
+      subject.perform_async('foo_delta')
     end
 
     context 'when an index is locked' do
@@ -43,12 +43,12 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
 
       it "should not start the indexer" do
         subject.should_not_receive(:`)
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       it "should start the indexer for unlocked indexes" do
         subject.should_receive(:`)
-        subject.perform('bar_delta')
+        subject.perform_async('bar_delta')
       end
     end
 
@@ -68,19 +68,19 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
 
       it 'should get the processing set of flag as deleted document ids' do
         ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.should_receive(:processing_members).with('foo_core')
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       it "should not update if Sphinx isn't running" do
         ThinkingSphinx.stub(:sphinx_running? => false)
         client.should_not_receive(:update)
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       it "should validate the document ids with sphinx" do
         subject.should_receive(:filter_flag_as_deleted_ids).with(document_ids, 'foo_core')
 
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       context "with invalid ids" do
@@ -92,14 +92,14 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
           client.should_receive(:update) do |index, attributes, values|
             values.should_not include(2)
           end
-          subject.perform('foo_delta')
+          subject.perform_async('foo_delta')
         end
 
         it "should update documents that are in the index" do
           client.should_receive(:update) do |index, attributes, values|
             values.keys.should eql(document_ids.reject{|x| x == 2})
           end
-          subject.perform('foo_delta')
+          subject.perform_async('foo_delta')
         end
       end
 
@@ -107,21 +107,21 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
         client.should_receive(:update) do |index, attributes, values|
           index.should == 'foo_core'
         end
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       it "should update the sphinx_deleted attribute" do
         client.should_receive(:update) do |index, attributes, values|
           attributes.should == ['sphinx_deleted']
         end
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       it "should set sphinx_deleted for valid documents to true" do
         client.should_receive(:update) do |index, attributes, values|
           document_ids.each {|id| values[id].should == [1] }
         end
-        subject.perform('foo_delta')
+        subject.perform_async('foo_delta')
       end
 
       context "without any ids" do
@@ -129,7 +129,7 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
 
         it "should not validate the ids with sphinx" do
           subject.should_not_receive(:filter_flag_as_deleted_ids)
-          subject.perform('foo_delta')
+          subject.perform_async('foo_delta')
         end
       end
     end

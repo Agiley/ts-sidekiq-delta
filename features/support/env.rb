@@ -17,7 +17,7 @@ world = Cucumber::ThinkingSphinx::InternalWorld.new
 world.configure_database
 
 require 'thinking_sphinx'
-require 'thinking_sphinx/deltas/resque_delta'
+require 'thinking_sphinx/deltas/sidekiq_delta'
 
 world.setup
 
